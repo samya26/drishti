@@ -217,8 +217,12 @@ export default function App() {
         <div className="absolute bottom-6 left-6 w-72 rounded-lg border border-cyan-400/30 bg-black/70 p-4 font-mono text-cyan-100 backdrop-blur">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xl font-bold text-cyan-300">{selected.callsign || 'Unknown'}</p>
-              <p className="text-xs text-cyan-100/60">{airline ?? 'Airline unknown'}</p>
+                           <p className="text-xl font-bold text-cyan-300">
+                {selected.callsign || selected.id.toUpperCase()}
+              </p>
+              <p className="text-xs text-cyan-100/60">
+                {selected.callsign ? (airline ?? 'Airline unknown') : 'No callsign broadcast'}
+              </p>
             </div>
             <button
               onClick={() => setSelectedId(null)}
