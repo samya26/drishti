@@ -26,7 +26,7 @@ async function getToken(): Promise<string> {
   })
   if (!res.ok) throw new Error(`OpenSky login failed (${res.status})`)
 
-  const data = await res.json()
+    const data = (await res.json()) as { access_token: string; expires_in: number }
   cachedToken = {
     value: data.access_token,
     expiresAt: Date.now() + (data.expires_in - 60) * 1000, // refresh 1 min early
@@ -45,8 +45,8 @@ export async function GET(): Promise<Response> {
     })
     if (!res.ok) throw new Error(`OpenSky data failed (${res.status})`)
 
-    const data = await res.json()
-    const flights = ((data.states ?? []) as StateVector[])
+       const data = (await res.json()) as { time: number; states: StateVector[] | null }
+    const flights = (data.states ?? [])
       .filter((s) => s[5] != null && s[6] != null && !s[8]) // has a position and is in the air
       .map((s) => ({
         id: s[0] as string, // unique aircraft code
