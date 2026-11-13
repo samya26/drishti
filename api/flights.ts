@@ -38,8 +38,10 @@ async function getToken(): Promise<string> {
 type StateVector = (string | number | boolean | null)[]
 
 export async function GET(): Promise<Response> {
+  let step = 'login' // which part failed, to make errors easier to debug
   try {
     const token = await getToken()
+    step = 'data'
     const res = await fetch(STATES_URL, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -64,7 +66,12 @@ export async function GET(): Promise<Response> {
       // Let Vercel's cache serve the same answer for 90 s to save API credits
       { headers: { 'Cache-Control': 's-maxage=90, stale-while-revalidate=30' } },
     )
-  } catch (err) {
-    return Response.json({ error: (err as Error).message }, { status: 502 })
+    } catch (err) {
+    // Network errors hide the real reason in `cause` (e.g. a timeout or refused connection)
+    const e = err as Error & { cause?: { code?: string; message?: string } }
+    const reason = e.cause?.code ?? e.cause?.message
+    return Response.json(
+      { error: `${step} failed: ${e.message}${reason ? ` (${reason})` : ''}` },
+      { status: 502 },
+    )
   }
-}
